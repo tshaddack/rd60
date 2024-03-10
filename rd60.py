@@ -75,7 +75,7 @@ class LowLevelSerPort:
     return res
 
   def recvflush(self):
-    n=self.port.in_waiting
+    #n=self.port.in_waiting
     self.port.reset_input_buffer()
     return 0
 
@@ -98,6 +98,8 @@ class LowLevelTcpPort:
   connretries=5
   connected=False
 
+  reconnect=True
+
   def __init__(self,addr,port):
     self.ipaddr=addr
     self.ipport=port
@@ -108,13 +110,13 @@ class LowLevelTcpPort:
     self.sock.settimeout(self.timeout)
     for t in range(0,self.connretries):
       try:
-        if t>0: print('retrying...',t)
+        if t>0: print('SOCK:connection retrying...',t,file=stdlog)
         self.sock.connect( (self.ipaddr,self.ipport) )
         self.connected=True
         break
       except Exception as e:
         print('SOCKCONNERR:',e)
-        sleep(0.5)
+        sleep(min(0.5+t,5)) # increase retries delay, max. 5s
     if not self.connected:
       print('ERRSOCKCONN: cannot connect to',self.ipaddr,':',self.ipport,'- too many retries. Aborting.',file=stdlog)
       exit(12)
@@ -128,10 +130,23 @@ class LowLevelTcpPort:
 
   def send(self,raw,showpacket=None):
     if showpacket!=None and self.verbport: showpacket(raw,name='SOCK:SEND',check=False,file=stdlog)
-    return self.sock.sendall(raw)
+    try:  return self.sock.sendall(raw)
+    except socket.error as e:
+      print('SOCK:SEND:ERR:',e,file=stderr)
+      if self.reconnect: self.connect()
 
   def recv(self,l,showpacket=None):
-    res=self.sock.recv(l)
+    try: res=self.sock.recv(l)
+    except socket.error as e:
+      print('SOCK:RECV:ERR:',e,file=stderr)
+      if self.reconnect:
+        try: self.close()
+        except Exception as e: print('SOCK:CLOSE:ERR:',e,file=stderr)
+        self.connect()
+        return b''
+      else:
+        print('SOCK:RECV:aborting',file=stderr)
+        exit(15)
     if showpacket!=None and self.verbport: showpacket(res,name='SOCK:RECV',check=False,file=stdlog)
     return res
 
@@ -952,7 +967,7 @@ class PSU_RD60XX:
 
   # set memory to real values, convert from float to int
   def setmem(self,addr,arr): # expects [volt,amp,ovolt,oamp]
-    if addr==0: self.ovp=arr[2];self.ocp=a[3]
+    if addr==0: self.ovp=arr[2];self.ocp=arr[3]
     self.setmemraw(addr,[int(arr[0]*self.vmult), int(arr[1]*self.imult), int(arr[2]*self.vmult), int(arr[3]*self.imult) ])
 
   # set output voltage
@@ -1199,7 +1214,7 @@ class PowerSupply:
       if help: print('  LOOP:[xx]      loop for xx time or endless if not specified');return False
       no=cmdarr[1]
       if no!='':
-        try: n=int(no)
+        try: int(no)
         except: print('[Unknown loops count:',cmd,' seen as "'+no+'" ]');return False
 
     # show device type
