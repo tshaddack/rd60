@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="pragma" content="no-cache; charset=utf-8" />
+<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RD60.py, python control for RD60xx power supplies</title>
+<style type="text/css">
+
+body {background-color:#FFFFDD}
+
+//td {vertical-align:top;padding:0px;margin:0px}
+p {text-align:justify;margin-bottom:0px}
+td.gchord {font-size:75%;font-weight:bold;padding:0px;margin:0px;padding-top:0px;padding-right:3px;text-align:left;font-family:verdana,arial;color:#888888;position:relative;top:3px}
+td.gtxt {text-align:left}
+.dettitle {border-bottom:1px lightgray dashed}
+.dettitle2 {border-bottom:1px lightgray dashed}
+
+h2 {margin-top:20px; background-color:xgray}
+h3 {background-color:xyellow;margin-top:30px;text-decoration:underline}
+h4 {padding-left:0px;margin-left:0px;text-decoration:underline;color:#333333}
+ul {margin-top:0px;padding-top:0px}
+.ref {color:gray}
+
+.gr {color:gray}
+.grsm {color:gray;font-size:80%}
+.err {color:red;font-weight:bold}
+
+a {text-color:blue;text-decoration:underline}
+a:HOVER {border-bottom:1px blue;color:red}
+a.index {text-decoration:none}
+a.index:HOVER {text-decoration:underline;color:red}
+
+.preFile {background-color:lightgray;padding:0.5em}
+
+td.imgthumb {vertical-align:top;padding:5px;font-size:80%}
+img.ico {width:12px;height:12px;overflow:visible;position:relative;margin-top:-5px}
+.imginc {max-width:100%;max-height:80vh}
+.imginccap {text-align:left;padding-bottom:0.5em}
+
+div.code {margin:0px;padding:0px;padding-left:30px;}
+.code {font-family:courier,fixed;color:green;}
+
+.cmd {font-family:courier,fixed;color:red;background-color:#FFEEDD;font-weight:bold;white-space:pre-wrap;padding-left:0.5em;;padding-right:0.5em;padding-top:0.5em;padding-bottom:0.5em}
+.cmd::first-line {color:darkred;}
+.cmd::before {content:'> ';}
+
+.cmdresp {font-family:courier,fixed;color:blue;background-color:#EEEEFF;white-space:pre-wrap;padding-left:0.5em;;padding-right:0.5em;}
+.cmdresp::first-line {color:darkblue;}
+.cmdresp::before {content:'  ';}
+
+.comm {font-family:courier,fixed;color:red;background-color:#FFEEDD;font-weight:bold;white-space:pre-wrap;padding-left:0.5em;;padding-right:0.5em;}
+.comm::first-line {color:darkred;}
+.comm::before {content:'> ';}
+
+.commresp {font-family:courier,fixed;color:blue;background-color:#EEEEFF;white-space:pre-wrap;padding-left:0.5em;;padding-right:0.5em;}
+.commresp::first-line {color:darkblue;}
+.commresp::before {content:'< ';}
+
+.bang {font-weight:bold;color:red}
+
+
+// unsupported by everything except apple, so far
+//@media screen and (inverted-colors: inverted) {
+//.cmd {background-color:#0000CC;color:lightblue;}
+//.cmd::first-line: {color:blue}
+//.cmdresp {background-color:#CC0000;color:lightred}
+//.cmdresp::first-line: {color:red}
+//}
+
+
+@media print{
+body {font-size:80%}
+.noprint {display:none;visibility:hidden}
+.xnopbr {page-break-inside:avoid}
+td.gchord: {color:black}
+.nopbr {}
+.preFile {background-color:white;border:1px dotted black}
+}
+</style>
+<meta property="og:title" content="RD60.py, python control for RD60xx power supplies" />
+<meta property="og:type" content="website" />
+<meta property="og:x-url" content="http://:" />
+<meta property="og:description" content="software for control of Riden RD6024 power supply and some others" />
+</head>
+<body>
+<h1>RD60.py, python control for RD60xx power supplies</h1><hr class="noprint" /><div class="noprint"><a class="index indexlev2" href="#Why" title="">Why</a><br /><a class="index indexlev2" href="#How" title="How">How</a><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><a class="index indexlev3" href="#dependencies" title="How.dependencies">dependencies</a></small><br /><a class="index indexlev2" href="#Usage" title="Usage">Usage</a><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><a class="index indexlev3" href="#hardwareconfiguration" title="Usage.hardware configuration">hardware configuration</a></small><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><a class="index indexlev3" href="#commands" title="Usage.commands">commands</a></small><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><a class="index indexlev3" href="#registers" title="Usage.registers">registers</a></small><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><a class="index indexlev3" href="#settings" title="Usage.settings">settings</a></small><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><a class="index indexlev3" href="#miniscripts" title="Usage.miniscripts">miniscripts</a></small><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><a class="index indexlev4" href="#loops" title="Usage.miniscripts.loops">loops</a></small><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><a class="index indexlev4" href="#stdin" title="Usage.miniscripts.stdin">stdin</a></small><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><a class="index indexlev4" href="#dataononeline" title="Usage.miniscripts.data on one line">data on one line</a></small><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><a class="index indexlev4" href="#connectionpersistence" title="Usage.miniscripts.connection persistence">connection persistence</a></small><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><a class="index indexlev3" href="#verbosity" title="Usage.verbosity">verbosity</a></small><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><a class="index indexlev3" href="#temperatures" title="Usage.temperatures">temperatures</a></small><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><a class="index indexlev3" href="#batterymode" title="Usage.battery mode">battery mode</a></small><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><a class="index indexlev3" href="#autoconfiguration" title="Usage.autoconfiguration">autoconfiguration</a></small><br /><a class="index indexlev2" href="#Files" title="Files">Files</a><br /><a class="index indexlev2" href="#TODO" title="TODO">TODO</a><br /></div><hr /><a name="Why"></a><h2> Why
+</h2>
+<p>
+It was necessary to control a&nbsp;Riden power supply for some lab automation purposes.
+The stock software was useless for the&nbsp;purpose.
+</p>
+<p>
+Fortunately, the&nbsp;protocol is documented enough, and based on MODBUS.
+</p>
+<p>
+All available software is in this or that form dependent on some MODBUS library, which
+relies on the&nbsp;assumption of a&nbsp;fully functional local or at least virtual serial port of /dev/ttySx
+or /dev/ttyUSBx or such nature.
+</p>
+<p>
+The wired ports require... umm... wires. USB to a&nbsp;nearby computer. Which is not always feasible.
+The virtual COM ports require OS-specific (and often capricious) port emulating software on the
+computer side. All when all that's necessary is a&nbsp;pipe for bytes in, bytes out.
+</p>
+<p>
+An expedient plain <a class="P" href="https://www.improwis.com/projects/hw_SerialOverTCP" title="local project" target="_blank">serial-over-TCP</a> ("TasmoCOM") solution was chosen, leveraging ESP8266
+and <a class="w" href="https://en.wikipedia.org/wiki/Tasmota" title="Wikipedia link: Tasmota" target="_blank">Tasmota</a>, a&nbsp;proven cheap and opensource approach.
+</p>
+<p>
+For the&nbsp;hardware, see <a class="P" href="https://www.improwis.com/projects/hw_RD6024powersupply" title="local project" target="_blank">hw_RD6024powersupply</a>.
+</p>
+<p>
+For the&nbsp;control code for an artificial load, see <a class="P" href="https://www.improwis.com/projects/sw_dl24" title="local project" target="_blank">sw_dl24</a>.
+</p>
+<p>
+Tested with:
+<ul><li> RD6024, deviceID 60241
+</li><li> RK6006, deviceID 60066
+</li></ul></p>
+<hr /><a name="How"></a><h2> How
+</h2>
+<p>
+<span class="code">rd60.py</span>, a&nbsp;python-based (for portability) script, was written. The software allows both
+using a&nbsp;tty-style port and a&nbsp;raw TCP socket, with no fancy RFC2217&nbsp;support. If the&nbsp;latter is needed, URI-style
+pyserial syntax is available with the&nbsp;port.
+</p>
+<p>
+The software defines a&nbsp;hierarchy of classes:
+<ul><li> <span class="code">class LowLevelSerPort</span> - for wired /dev/ttyX ports or full virtual ports
+</li><li> <span class="code">class LowLevelTcpPort</span> - for raw TCP sockets, TasmoCOM style
+</li><li> <span class="code">class RDModbus</span> - <a class="w" href="https://en.wikipedia.org/wiki/MODBUS" title="Wikipedia link: MODBUS" target="_blank">MODBUS</a> protocol, implementing the&nbsp;Riden function subset (3, 6, 16)
+</li><li> <span class="code">class PSU_RD60XX</span> - functions specific for the&nbsp;RD60xx power supplies, register lists
+</li><li> <span class="code">class PowerSupply</span> - command interpreter, configfile reader
+</li></ul></p>
+<a name="dependencies"></a><h3> dependencies
+</h3>
+<p>
+The software tries to minimize dependencies.
+</p>
+<p>
+The mandatory ones, and mostly standard ones, are:
+<ul><li> <span class="code">socket</span> (for TCP communication)
+</li><li> <span class="code">time</span> (for sleep)
+</li><li> <span class="code">struct</span> (pack/unpack, for conversion of packets to/from byte stream)
+</li></ul>The nonmandatory, imported only as needed (so the&nbsp;process would run when a&nbsp;missing dependency is not required), are:
+<ul><li> <span class="code">serial</span> (pyserial, for serial ports)
+</li><li> <span class="code">datetime</span> (for date/time settings)
+</li><li> <span class="code">json</span> (for JSON format output)
+</li></ul></p>
+<hr /><a name="Usage"></a><h2> Usage
+</h2>
+<pre class="preFile">RD60 Riden RD60xx power supply control
+Usage: ./rd60.py &lt;command&gt; [command]...
+Commands:
+
+  ON             enable output
+  OFF            disable output
+
+  nn.nnV         set output voltage
+  nn.nnMA        set output current
+  nn.nnA         set output current
+  nn.nnVO        set overvoltage protection
+  nn.nnMAO       set overcurrent protection
+  nn.nnAO        set overcurrent protection
+
+  QV             query actual voltage
+  QA             query actual current
+  QBV            query battery voltage
+  QTE            query external temperature
+  QTI            query internal temperature
+  QREGxx or Qxx  query register xx (name or decimal)
+
+  STATE[:opts]   print setting state in JSON format
+  STATEJ[:opts]  print setting state in JSON format, like opts=J
+          opts:  J=JSON, S=short (V/A only), T=show time, U=show UTC time, B=force battery
+
+  REGxx=yy       write register xx to value yy (decimal)
+  REGS           dump registers
+  REGSALL        dump registers including memories and calibration
+  REGSALL:n      dump n registers
+  REGSDIFF       show registers difference
+
+  TCP=addr[:port]           set connection via TCP
+  PORT=/dev/ttyport[@baud]  set connection via serial port
+  ROBUST         increase timeouts and retries
+
+  BAT            enable battery charging related registers
+  NOBAT          disable battery charging related registers
+  STDIN          read commands from stdin
+  LOOP:[xx]      loop for xx time or endless if not specified
+  SLEEPxx        sleep for xx seconds
+  VERB or -V     list MODBUS transactions; affects subsequent commands
+  LINE           output the Q-queries as space-separated instead of newline-separated
+  SETMEMx=v,a,vo,ao   set memory x to values
+  MEMS           dump memories
+  SETCLOCK       set clock to current datetime
+  CFGFILE        generate config file template to stdout
+
+For volt and amp setting, prefixing the value with + or - marks it as relative, to be added/subtracted to the current value
+Commands are executed in sequence. Writes are cached and grouped together to minimize bus transactions.
+Commands are case-insensitive.
+Command &quot;-&quot; forces a newline into output.
+</pre><a name="hardwareconfiguration"></a><h3> hardware configuration
+</h3>
+<p>
+The host:port or serport:baudrate are saved in ~/.rd60.cfg (or other name, where filename is derived from
+the command by stripping the&nbsp;.py suffix and prefixing a&nbsp;home directory and a&nbsp;dot). This variability allows
+to use several symlinks for different power supplies simultaneously used, eg. as rd60a, rd60b,...
+</p>
+<p>
+The configfile template can be generated on demand by command <span class="code">CFGFILE</span>.
+</p>
+<p>
+Directly, the&nbsp;devices may be specified as <span class="code">TCP=&lt;host&gt;[:port] </span> or <span class="code">PORT=/dev/ttyUSBx@baudrate</span>,
+eg. <span class="code">TCP=10.0.1.15:8888</span> or <span class="code">PORT=/dev/ttyUSB1@115200</span> or <span class="code">PORT=/dev/ttyUSB1</span> (default speed is 115200).
+</p>
+<p>
+The PORT directive, both in command and in config, also supports the&nbsp;<a class="a" href="https://pyserial.readthedocs.io/en/latest/url_handlers.html" title="remote link: https://pyserial.readthedocs.io/en/latest/url_handlers.html" target="_blank">URL form</a>.
+</p>
+<a name="commands"></a><h3> commands
+</h3>
+<p>
+The script takes a&nbsp;sequence of commands from commandline, separated by spaces. Each command is a&nbsp;single token,
+optionally containing separator characters.
+</p>
+<p>
+The commands can be a&nbsp;fixed string (<span class="code">STATE</span>, <span class="code">REGS</span>, <span class="code">QV</span>, ...) or a&nbsp;prefix with value, or value with suffix (12.5<span class="code">V</span>,
+<span class="code">SLEEP</span>1.5, <span class="code">REG</span>12<span class="code">=</span>8123, <span class="code">Q</span>VIN...)
+</p>
+<p>
+Register names can be sent as decimal address or as a&nbsp;name. <span class="code">Q3</span> and <span class="code">QFW</span> are the&nbsp;same.
+</p>
+<p>
+Some commands look like register commands but refer directly to values:
+<ul><li> <span class="code">QV</span>, <span class="code">QA</span> - for querying output voltage/amperage
+</li><li> <span class="code">QMV</span>, <span class="code">QMA</span> - same, but integer value in millivolts/milliamps instead of float, for bash comparisons
+</li></ul></p>
+<a name="registers"></a><h3> registers
+</h3>
+<p>
+The <span class="code">REGS</span> and <span class="code">REGSALL</span> commands read and dump the&nbsp;power supply's MODBS registers. REGS only first 42, REGSALL take in 122&nbsp;(which
+includes calibration registers (do not touch unless you MUST) and the&nbsp;memories (M0&nbsp;is for the&nbsp;currently set overvoltage and overcurrent
+protections (OVP and OCP), M1..M9&nbsp;are for presets).
+</p>
+<p>
+The registers dump shows register address in hex and decimal, value in decimal and hex, r/rw for readonly and readwrite, short name, and description.
+Registers with zero value and no known name are assumed unused and are skipped.
+</p>
+<div class="cmd">./rd60.py regs</div><pre class="">x00&nbsp;  0&nbsp; 60241&nbsp;0xeb51&nbsp;r   ID             type ID
+x01&nbsp;  1&nbsp;     0&nbsp;0x0000&nbsp;r   SN_H           serial number H
+x02&nbsp;  2&nbsp; 10542&nbsp;0xXXXX r   SN_L           serial number L
+x03&nbsp;  3&nbsp;   138&nbsp;0x008a r   FW             firmware version *100
+x04&nbsp;  4&nbsp;     0&nbsp;0x0000&nbsp;r   INT_C_S        INT_C_S
+x05&nbsp;  5&nbsp;    44&nbsp;0x002c r   INT_C          internal temperature C
+x06&nbsp;  6&nbsp;     0&nbsp;0x0000&nbsp;r   INT_F_S        INT_F_S
+x07&nbsp;  7&nbsp;   111&nbsp;0x006f r   INT_F          internal temperature F
+x08&nbsp;  8&nbsp;  1000&nbsp;0x03e8&nbsp;rw  V_SET          set voltage
+x09&nbsp;  9&nbsp;   210&nbsp;0x00d2&nbsp;rw  I_SET          set current
+x0a  10&nbsp;   998&nbsp;0x03e6&nbsp;r   V_OUT          actual voltage
+x0b  11&nbsp;     0&nbsp;0x0000&nbsp;r   I_OUT          actual current
+x0c  12&nbsp;     0&nbsp;0x0000&nbsp;r   AH             AH
+x0d  13&nbsp;     0&nbsp;0x0000&nbsp;r   P_OUT          actual power
+x0e  14&nbsp;  6789&nbsp;0x1a85&nbsp;r   V_IN           input voltage
+x0f  15&nbsp;     1&nbsp;0x0001&nbsp;r   KEYPAD         keyboard locked
+x10&nbsp; 16&nbsp;     0&nbsp;0x0000&nbsp;r   OVP_OCP        OVP-OCP active
+x11&nbsp; 17&nbsp;     0&nbsp;0x0000&nbsp;r   CV_CC          output at constant current
+x12&nbsp; 18&nbsp;     1&nbsp;0x0001&nbsp;rw  OUTPUT         output enabled
+x13&nbsp; 19&nbsp;     0&nbsp;0x0000&nbsp;rw  PRESET         preset number
+x14&nbsp; 20&nbsp;     0&nbsp;0x0000&nbsp;r   I_RANGE        I_RANGE
+x20&nbsp; 32&nbsp;     0&nbsp;0x0000&nbsp;r   BAT_MODE       battery mode enabled
+x21&nbsp; 33&nbsp;     0&nbsp;0x0000&nbsp;r   V_BAT          battery voltage
+x22&nbsp; 34&nbsp;     1&nbsp;0x0001&nbsp;r   EXT_C_S        EXT_C_S
+x23&nbsp; 35&nbsp;    89&nbsp;0x0059&nbsp;r   EXT_C          battery temperature C
+x24&nbsp; 36&nbsp;     1&nbsp;0x0001&nbsp;r   EXT_F_S        EXT_F_S
+x25&nbsp; 37&nbsp;   129&nbsp;0x0081&nbsp;r   EXT_F          battery temperature F
+x26&nbsp; 38&nbsp;     0&nbsp;0x0000&nbsp;r   AH_H           amphour H
+x27&nbsp; 39&nbsp;     0&nbsp;0x0000&nbsp;r   AH_L           amphour L
+x28&nbsp; 40&nbsp;     0&nbsp;0x0000&nbsp;r   WH_H           watthour H
+x29&nbsp; 41&nbsp;     0&nbsp;0x0000&nbsp;r   WH_L           watthour L
+</pre><p>
+or, for <span class="code">REGSALL</span>, also
+<pre class="">x30&nbsp; 48&nbsp;  2023&nbsp;0x07e7&nbsp;rw  YEAR           clock year
+x31&nbsp; 49&nbsp;    12&nbsp;0x000c rw  MONTH          clock month
+x32&nbsp; 50&nbsp;    16&nbsp;0x0010&nbsp;rw  DAY            clock day
+x33&nbsp; 51&nbsp;     0&nbsp;0x0000&nbsp;rw  HOUR           clock hour
+x34&nbsp; 52&nbsp;    20&nbsp;0x0014&nbsp;rw  MINUTE         clock minute
+x35&nbsp; 53&nbsp;    44&nbsp;0x002c rw  SECOND         clock second
+x37&nbsp; 55&nbsp;    24&nbsp;0xXXXX rw  V_OUT_ZERO     calibration V_OUT_ZERO
+x38&nbsp; 56&nbsp; 24859&nbsp;0xXXXX rw  V_OUT_SCALE    calibration V_OUT_SCALE
+x39&nbsp; 57&nbsp;    33&nbsp;0xXXXX rw  V_BACK_ZERO    calibration V_BACK_ZERO
+x3a  58&nbsp; 24543&nbsp;0xXXXX rw  V_BACK_SCALE   calibration V_BACK_SCALE
+x3b  59&nbsp;   334&nbsp;0xXXXX rw  I_OUT_ZERO     calibration I_OUT_ZERO
+x3c  60&nbsp;  4327&nbsp;0xXXXX rw  I_OUT_SCALE    calibration I_OUT_SCALE
+x3d  61&nbsp;    59&nbsp;0xXXXX rw  I_BACK_ZERO    calibration I_BACK_ZERO
+x3e  62&nbsp;  4663&nbsp;0xXXXX rw  I_BACK_SCALE   calibration I_BACK_SCALE
+x42&nbsp; 66&nbsp;     1&nbsp;0x0001&nbsp;rw  OPT_TAKE_OK    OPT_TAKE_OK
+x43&nbsp; 67&nbsp;     0&nbsp;0x0000&nbsp;rw  OPT_TAKE_OUT   output enabled on memory select
+x44&nbsp; 68&nbsp;     0&nbsp;0x0000&nbsp;rw  OPT_BOOT_POW   output enabled on boot
+x45&nbsp; 69&nbsp;     1&nbsp;0x0001&nbsp;rw  OPT_BUZZ       buzzer enabled
+x46&nbsp; 70&nbsp;     1&nbsp;0x0001&nbsp;rw  OPT_LOGO       logo enabled on boot
+x47&nbsp; 71&nbsp;     0&nbsp;0x0000&nbsp;rw  OPT_LANG       interface language
+x48&nbsp; 72&nbsp;     3&nbsp;0x0003&nbsp;rw  OPT_LIGHT      display backlight level
+x50&nbsp; 80&nbsp;   300&nbsp;0x012c rw  M0_V           currently set V
+x51&nbsp; 81&nbsp;   200&nbsp;0x00c8&nbsp;rw  M0_I           currently set I
+x52&nbsp; 82&nbsp;  2000&nbsp;0x07d0&nbsp;rw  M0_OVP         currently set OVP
+x53&nbsp; 83&nbsp;   220&nbsp;0x00dc rw  M0_OCP         currently set OCP
+x54&nbsp; 84&nbsp;   600&nbsp;0x0258&nbsp;rw  M1_V           memory M1&nbsp;V
+x55&nbsp; 85&nbsp;   200&nbsp;0x00c8&nbsp;rw  M1_I           memory M1&nbsp;I
+x56&nbsp; 86&nbsp;   700&nbsp;0x02bc rw  M1_OVP         memory M1&nbsp;OVP
+x57&nbsp; 87&nbsp;   500&nbsp;0x01f4&nbsp;rw  M1_OCP         memory M1&nbsp;OCP
+x58&nbsp; 88&nbsp;   500&nbsp;0x01f4&nbsp;rw  M2_V           memory M2&nbsp;V
+x59&nbsp; 89&nbsp;  2410&nbsp;0x096a rw  M2_I           memory M2&nbsp;I
+x5a  90&nbsp;  6200&nbsp;0x1838&nbsp;rw  M2_OVP         memory M2&nbsp;OVP
+x5b  91&nbsp;  2420&nbsp;0x0974&nbsp;rw  M2_OCP         memory M2&nbsp;OCP
+x5c  92&nbsp;   500&nbsp;0x01f4&nbsp;rw  M3_V           memory M3&nbsp;V
+x5d  93&nbsp;  2410&nbsp;0x096a rw  M3_I           memory M3&nbsp;I
+x5e  94&nbsp;  6200&nbsp;0x1838&nbsp;rw  M3_OVP         memory M3&nbsp;OVP
+x5f  95&nbsp;  2420&nbsp;0x0974&nbsp;rw  M3_OCP         memory M3&nbsp;OCP
+x60&nbsp; 96&nbsp;   500&nbsp;0x01f4&nbsp;rw  M4_V           memory M4&nbsp;V
+x61&nbsp; 97&nbsp;  2410&nbsp;0x096a rw  M4_I           memory M4&nbsp;I
+x62&nbsp; 98&nbsp;  6200&nbsp;0x1838&nbsp;rw  M4_OVP         memory M4&nbsp;OVP
+x63&nbsp; 99&nbsp;  2420&nbsp;0x0974&nbsp;rw  M4_OCP         memory M4&nbsp;OCP
+x64&nbsp;100&nbsp;   500&nbsp;0x01f4&nbsp;rw  M5_V           memory M5&nbsp;V
+x65&nbsp;101&nbsp;  2410&nbsp;0x096a rw  M5_I           memory M5&nbsp;I
+x66&nbsp;102&nbsp;  6200&nbsp;0x1838&nbsp;rw  M5_OVP         memory M5&nbsp;OVP
+x67&nbsp;103&nbsp;  2420&nbsp;0x0974&nbsp;rw  M5_OCP         memory M5&nbsp;OCP
+x68&nbsp;104&nbsp;   500&nbsp;0x01f4&nbsp;rw  M6_V           memory M6&nbsp;V
+x69&nbsp;105&nbsp;  2410&nbsp;0x096a rw  M6_I           memory M6&nbsp;I
+x6a 106&nbsp;  6200&nbsp;0x1838&nbsp;rw  M6_OVP         memory M6&nbsp;OVP
+x6b 107&nbsp;  2420&nbsp;0x0974&nbsp;rw  M6_OCP         memory M6&nbsp;OCP
+x6c 108&nbsp;   500&nbsp;0x01f4&nbsp;rw  M7_V           memory M7&nbsp;V
+x6d 109&nbsp;  2410&nbsp;0x096a rw  M7_I           memory M7&nbsp;I
+x6e 110&nbsp;  6200&nbsp;0x1838&nbsp;rw  M7_OVP         memory M7&nbsp;OVP
+x6f 111&nbsp;  2420&nbsp;0x0974&nbsp;rw  M7_OCP         memory M7&nbsp;OCP
+x70&nbsp;112&nbsp;   500&nbsp;0x01f4&nbsp;rw  M8_V           memory M8&nbsp;V
+x71&nbsp;113&nbsp;  2410&nbsp;0x096a rw  M8_I           memory M8&nbsp;I
+x72&nbsp;114&nbsp;  6200&nbsp;0x1838&nbsp;rw  M8_OVP         memory M8&nbsp;OVP
+x73&nbsp;115&nbsp;  2420&nbsp;0x0974&nbsp;rw  M8_OCP         memory M8&nbsp;OCP
+x74&nbsp;116&nbsp;   500&nbsp;0x01f4&nbsp;rw  M9_V           memory M9&nbsp;V
+x75&nbsp;117&nbsp;  2410&nbsp;0x096a rw  M9_I           memory M9&nbsp;I
+x76&nbsp;118&nbsp;  6200&nbsp;0x1838&nbsp;rw  M9_OVP         memory M9&nbsp;OVP
+x77&nbsp;119&nbsp;  2420&nbsp;0x0974&nbsp;rw  M9_OCP         memory M9&nbsp;OCP
+</pre></p>
+<a name="settings"></a><h3> settings
+</h3>
+<p>
+The voltage, current, and overvoltage/overcurrent protection can be set with suffix-based commands.
+For the&nbsp;value of 1.23, the&nbsp;commands are
+<ul><li> <span class="code">1.23V</span> - set output voltage
+</li><li> <span class="code">1.23A</span> - set output current
+</li><li> <span class="code">1230MA</span> - set output current in milliamps
+</li><li> <span class="code">1.23VO</span> - set overvoltage protection (OVP)
+</li><li> <span class="code">1.23AO</span> - set overcurrent protection (OCP)
+</li><li> <span class="code">1230MAO</span> - set overcurrent protection (OCP) in milliamps
+</li><li> <span class="code">+1.23V</span> - increase output voltage
+</li><li> <span class="code">-1.23V</span> - decrease output voltage
+</li><li> <span class="code">+1.23A</span> - increase output current
+</li><li> <span class="code">+1230MA</span> - increase output current in milliamps
+</li></ul></p>
+<p>
+The battery-related registers are not refreshed during usual operations. If the&nbsp;power supply is to be used in battery charging duty,
+enable related reporting with command <span class="code">BAT</span>. 
+<pre class=""><del><b></b></del></pre></p>
+<a name="miniscripts"></a><h3> miniscripts
+</h3>
+<p>
+The commands are executed in order. To minimize bus transactions, the&nbsp;ones from the&nbsp;low memory area (first 42&nbsp;registers) are grouped into a&nbsp;single write.
+</p>
+<ul><li> set voltage and current, enable output
+</li><ul><li> <span class="code">rd60.py 12v 550ma on</span>
+</li></ul><li> toggle output, wait half second, show state
+</li><ul><li> <span class="code">rd60.py toggle sleep0.5 state</span>
+</li></ul><li> set output to 5&nbsp;volts and enable, wait a&nbsp;second, increase by volt, wait a&nbsp;second, increase by another two volts, show state and power off
+</li><ul><li> <span class="code">rd60.py on 5v sleep1 +1v sleep1 +2v sleep0.5 state off</span>
+</li></ul><li> show output voltage and power, one per line (QP_OUT queries register by name)
+</li><ul><li> <span class="code">rd60.py qv qP_OUT</span>
+</li></ul><li> show output voltage in millivolts and current in milliamps, space-separated
+</li><ul><li> <span class="code">rd60.py qmv qma | tr '\n' ' '</span>
+</li></ul><li> disable output, set output voltage and current, overvoltage and overcurrent, enable output
+</li><ul><li> <span class="code">rd60.py off 4.9v 1250ma 5.5vo 2.1ao on</span>
+</li></ul></ul><a name="loops"></a><h4> loops
+</h4>
+<p>
+The <span class="code">LOOP:</span> statement can be used for repeating of commands. The subsequent command set is repeated forever, or for specified number of times.
+</p>
+<ul><li> show status in JSON format, forever
+</li><ul><li> <span class="code">rd60.py loop: jstate</span>
+</li></ul><li> ramp voltage by 20mV over time, from 5&nbsp;to 15V, watch status:
+</li><ul><li> <span class="code">rd60.py 5v on loop:500 +0.02v sleep0.5 jstat</span>
+</li></ul></ul><a name="stdin"></a><h4> stdin
+</h4>
+<p>
+The commands can be sent from another script, via stdin. The <span class="code">STDIN</span> statement has to be the&nbsp;last on the&nbsp;command line, everything after it is ignored.
+<ul><li> enable output, take file with voltages, send in one per second, then disable output
+</li><ul><li> <span class="code">cat file.txt | while read x; do echo $x; sleep 1; done | ./rd60.py on stdin; ./rd60.py off</span>
+</li></ul></ul></p>
+<a name="dataononeline"></a><h4> data on one line
+</h4>
+<p>
+The <span class="code">LINE</span> command sets the&nbsp;separator character between Q-values from default newline to a&nbsp;space. Groups of values then can be sent as single lines.
+<ul><li> check every 5&nbsp;seconds, send millivolts/battery millivolts/milliamps/internal temperature/constant-current register state, use battery mode:
+</li><ul><li> <span class="code">rd60.py bat line loop: qmv qbmv qma qti qcv_cc sleep5</span>
+</li></ul></ul></p>
+<a name="connectionpersistence"></a><h4> connection persistence
+</h4>
+<p>
+The connection to the&nbsp;port is opened when first needed, then kept open until the&nbsp;process closes.
+</p>
+<p>
+In some cases this may be detrimental to reliability (connection fail crashes the&nbsp;process). Running it anew each time may be beneficial then.
+</p>
+<a name="verbosity"></a><h3> verbosity
+</h3>
+<p>
+To see the&nbsp;port/socket opening/closing, and the&nbsp;bus transactions dumped in hex, use <span class="code">VERB</span> as the&nbsp;first command.
+</p>
+<div class="cmd">./rd60.py verb state</div><pre class="">CONFIGFILE:filename: /home/user/.rd60.cfg
+CONFIGFILE: {'host': 'rd60', 'port': '8888'}
+SOCK:connecting to rd60&nbsp;: 8888
+SOCK:connected
+MODBUS:CMND:READREGS 0&nbsp;42
+MODBUS:SEND 01:03:00:00:00:2a:c4:15&nbsp;(correct)
+MODBUS:RECV 01:03:54:eb:51:00:00:XX:XX:00:8a:00:00:00:2c:00:00:00:70:03:e8:00:d2:03:e6:00:00:00:00:00:00:1a:84:00:00:00:00:00:00:00:01:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01:00:59:00:01:00:81:00:00:00:00:00:00:00:00:XX:cd (correct)
+MODBUS:CMND:READREGS 82&nbsp;2
+MODBUS:SEND 01:03:00:52:00:02:65:da (correct)
+MODBUS:RECV 01:03:04:07:d0:00:dc:fb:27&nbsp;(correct)
+Vin =67.88&nbsp;v    tempin =44&nbsp;'c    tempext=89&nbsp;'c
+Vset=10.00&nbsp;v    OVP =20.00&nbsp;v
+Iset= 2.10&nbsp;a&nbsp;   OCP = 2.20&nbsp;a
+OUTPUT ENABLED
+Vout= 9.98&nbsp;v
+Iout= 0.00&nbsp;a
+SOCK:closed
+</pre><a name="temperatures"></a><h3> temperatures
+</h3>
+<p>
+The <span class="code">INT_C</span> and <span class="code">EXT_C</span> registers contain the&nbsp;power supply board temperature and the&nbsp;external NTC probe temperature in degrees C. (The corresponding _F registers
+use the&nbsp;Fahrenheit abomination.)
+</p>
+<p>
+Caution, if the&nbsp;external probe is not attached the&nbsp;register value contains swinging nonsense.
+</p>
+<a name="batterymode"></a><h3> battery mode
+</h3>
+<p>
+The power supply has a&nbsp;range of registers for specific use with battery charging (battery voltage measurements, watthours, amphours).
+To conserve socket/port transfers volume, this registers block is read only if the&nbsp;power supply is in battery mode.
+</p>
+<p>
+The battery mode is autodetected when the&nbsp;program starts; for prolonged loop-based operation, this will miss the&nbsp;battery detection event and the&nbsp;mode won't be changed,
+as the&nbsp;register is in the&nbsp;area that's read only during first start (unless in battery mode).
+</p>
+<p>
+The battery mode can be also manually forced by <span class="code">BAT</span> or disabled by <span class="code">NOBAT</span>.
+</p>
+<a name="autoconfiguration"></a><h3> autoconfiguration
+</h3>
+<p>
+The software borrows a&nbsp;trick (and table of devices) from <a class="w" href="https://en.wikipedia.org/wiki/Sigrok" title="Wikipedia link: Sigrok" target="_blank">Sigrok</a>'s libsigrok, the&nbsp;<a class="a" href="https://sigrok.org/gitweb/?p=libsigrok.git;a=tree;f=src/hardware/rdtech-dps" title="remote link: https://sigrok.org/gitweb/?p=libsigrok.git;a=tree;f=src/hardware/rdtech-dps" target="_blank">rdtech-dps</a>
+component. From the&nbsp;table of devices, based on the&nbsp;device ID (register 0), the&nbsp;type is identified and the&nbsp;voltage and amperage multipliers are loaded.
+(The registers provide data as 16bit integers, which have to be converted to the&nbsp;floats. With multiplier of 100, a&nbsp;1.28&nbsp;amp is set or read as 128.
+The multiplier has to be known, and is type-specific, otherwise the&nbsp;voltages/currents can be off by a&nbsp;magnitude or two. 100&nbsp;and 100&nbsp;is default when the
+type is unknown.
+</p>
+<hr /><a name="Files"></a><h2> Files
+</h2>
+<ul><li> <b><a class="F" href="rd60.py" title="local file">rd60.py</a></b> - code itself
+</li></ul><hr /><a name="TODO"></a><h2> TODO
+</h2>
+<ul><li> better windows compatibility
+</li><li> hardware mod for attaching an adc to the&nbsp;wifi unit, for streaming of measurements independent on the&nbsp;MODBUS
+</li><li> <a class="w" href="https://en.wikipedia.org/wiki/Standard_Commands_for_Programmable_Instruments" title="Wikipedia link: Standard Commands for Programmable Instruments" target="_blank">SCPI</a> emulation/gateway
+</li></ul><!-- feedback -->
+<!-- /feedback -->
+</body>
+</html>
